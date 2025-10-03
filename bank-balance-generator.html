@@ -85,7 +85,29 @@
                 };
             };
 
-            const processFile = (fileContent) => {
+            const handleFileUpload = (e) => {
+                const uploadedFile = e.target.files[0];
+                if (uploadedFile) {
+                    setFile(uploadedFile);
+                    // Limpar dados anteriores
+                    setData([]);
+                    setPreview([]);
+                    setStats(null);
+                    
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        // Processar com os estados atuais dos checkboxes
+                        processFileWithOptions(event.target.result, includeCarryover, includeThirteenth);
+                    };
+                    reader.onerror = () => {
+                        alert('Erro ao ler arquivo');
+                        setProcessing(false);
+                    };
+                    reader.readAsText(uploadedFile);
+                }
+            };
+
+            const processFileWithOptions = (fileContent, addCarryover, addThirteenth) => {
                 setProcessing(true);
                 
                 try {
@@ -142,31 +164,27 @@
                                     BALANCE: balances.entitlement,
                                     AS_OF_DATE: asOfDate
                                 });
-                            });
 
-                            // Adicionar Carryover se marcado
-                            if (includeCarryover) {
-                                seenIds.forEach(empId => {
+                                // Adicionar Carryover apenas se o parâmetro for true
+                                if (addCarryover) {
                                     processed.push({
-                                        EMPLOYEE_ID: formatEmployeeId(empId),
+                                        EMPLOYEE_ID: formattedEmpId,
                                         BANK: 'EXT_BRA_VACATION_CARRYOVER_BANK',
                                         BALANCE: '0.00',
-                                        AS_OF_DATE: formatDateISO(goLive)
+                                        AS_OF_DATE: asOfDate
                                     });
-                                });
-                            }
+                                }
 
-                            // Adicionar 13º Salário se marcado
-                            if (includeThirteenth) {
-                                seenIds.forEach(empId => {
+                                // Adicionar 13º apenas se o parâmetro for true
+                                if (addThirteenth) {
                                     processed.push({
-                                        EMPLOYEE_ID: formatEmployeeId(empId),
+                                        EMPLOYEE_ID: formattedEmpId,
                                         BANK: 'EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK',
                                         BALANCE: '1.0',
-                                        AS_OF_DATE: formatDateISO(goLive)
+                                        AS_OF_DATE: asOfDate
                                     });
-                                });
-                            }
+                                }
+                            });
 
                             setData(processed);
                             setPreview(processed.slice(0, 12));
@@ -185,22 +203,6 @@
                 } catch (error) {
                     alert('Erro ao processar arquivo: ' + error.message);
                     setProcessing(false);
-                }
-            };
-
-            const handleFileUpload = (e) => {
-                const uploadedFile = e.target.files[0];
-                if (uploadedFile) {
-                    setFile(uploadedFile);
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        processFile(event.target.result);
-                    };
-                    reader.onerror = () => {
-                        alert('Erro ao ler arquivo');
-                        setProcessing(false);
-                    };
-                    reader.readAsText(uploadedFile);
                 }
             };
 
