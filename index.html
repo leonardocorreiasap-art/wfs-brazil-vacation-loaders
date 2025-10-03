@@ -3,254 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WFS Brazil Tools - Cockpit de Ferramentas</title>
+    <title>WFS Brazil Tools - Cockpit</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        body {
+            font-family: 'Inter', sans-serif;
         }
-        .float-animation {
-            animation: float 3s ease-in-out infinite;
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+        .animated-gradient {
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #1e3a8a);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
         }
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite;
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen">
-    <!-- Particles Background Effect -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-20 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
-        <div class="absolute top-40 right-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style="animation-delay: 1s;"></div>
-        <div class="absolute bottom-20 left-40 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style="animation-delay: 2s;"></div>
-    </div>
-
-    <div class="relative z-10 container mx-auto px-4 py-12">
+<body class="animated-gradient min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        
         <!-- Header -->
-        <div class="text-center mb-16 float-animation">
-            <div class="inline-block mb-6">
-                <div class="text-8xl mb-4">🚀</div>
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl mb-6 glow">
+                <svg class="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
             </div>
-            <h1 class="text-6xl font-bold text-white mb-4 tracking-tight">
+            <h1 class="text-6xl font-extrabold text-white mb-4 tracking-tight">
                 WFS Brazil Tools
             </h1>
-            <p class="text-xl text-blue-300 mb-2">
-                Cockpit de Ferramentas para Workforce Software
+            <p class="text-xl text-blue-200 mb-2 font-medium">
+                Ferramentas Profissionais para Workforce Software
             </p>
-            <p class="text-sm text-gray-400">
-                Ferramentas especializadas em Time & Attendance | Conformidade CLT
+            <p class="text-sm text-slate-400">
+                Time & Attendance | Conformidade CLT | Automação de Go-Live
             </p>
         </div>
 
         <!-- Tools Grid -->
-        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            <!-- LD57 Generator -->
-            <div class="group relative bg-gradient-to-br from-indigo-900/50 to-blue-900/50 backdrop-blur-sm rounded-2xl p-8 border border-indigo-500/30 hover:border-indigo-400 transition-all duration-300 hover:scale-105 pulse-glow">
-                <div class="absolute top-4 right-4">
-                    <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">PRONTO</span>
-                </div>
-                
-                <div class="text-6xl mb-6">🏖️</div>
-                
-                <h2 class="text-3xl font-bold text-white mb-3">
-                    LD57 Generator
-                </h2>
-                
-                <p class="text-blue-200 mb-6">
-                    Gerador de arquivo de inicialização de períodos aquisitivos de férias
-                </p>
-                
-                <div class="space-y-2 mb-8 text-sm text-gray-300">
-                    <div class="flex items-center">
-                        <span class="text-green-400 mr-2">✓</span>
-                        Cálculo automático de período aquisitivo vigente
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-green-400 mr-2">✓</span>
-                        Layout WFS oficial (12 colunas)
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-green-400 mr-2">✓</span>
-                        Exclusão automática de estagiários (PP7)
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-green-400 mr-2">✓</span>
-                        Formatação de Employee ID (4 dígitos)
-                    </div>
-                </div>
-                
-                <a href="./ld57-generator.html" 
-                   class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-xl text-center transition-all duration-200 transform hover:scale-105 shadow-lg">
-                    Abrir Ferramenta →
-                </a>
-            </div>
+        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+            
+            <!-- LD57 Generator Card -->
+            <a href="./ld57-generator.html" class="block">
+                <div class="card-hover bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full blur-3xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex items-start justify-between mb-6">
+                            <div class="flex items-center justify-center w-16 h-16 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+                                <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                                </svg>
+                            </div>
+                            <span class="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full border border-green-500/30">
+                                PRONTO
+                            </span>
+                        </div>
 
-            <!-- Bank Balance Generator -->
-            <div class="group relative bg-gradient-to-br from-teal-900/50 to-green-900/50 backdrop-blur-sm rounded-2xl p-8 border border-teal-500/30 hover:border-teal-400 transition-all duration-300 hover:scale-105 pulse-glow" style="animation-delay: 0.5s;">
-                <div class="absolute top-4 right-4">
-                    <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">PRONTO</span>
+                        <h2 class="text-3xl font-bold text-white mb-3">
+                            LD57 Generator
+                        </h2>
+                        
+                        <p class="text-slate-400 mb-6 leading-relaxed">
+                            Gerador de arquivo de inicialização de períodos aquisitivos de férias
+                        </p>
+                        
+                        <div class="space-y-2 mb-6">
+                            <div class="flex items-center text-sm text-slate-300">
+                                <svg class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Cálculo automático de períodos
+                            </div>
+                            <div class="flex items-center text-sm text-slate-300">
+                                <svg class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Layout WFS oficial (12 colunas)
+                            </div>
+                            <div class="flex items-center text-sm text-slate-300">
+                                <svg class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Exclusão automática de estagiários
+                            </div>
+                            <div class="flex items-center text-sm text-slate-300">
+                                <svg class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Formatação completa de IDs
+                            </div>
+                        </div>
+
+                        <div class="flex items-center text-blue-400 font-semibold group-hover:text-blue-300 transition-colors">
+                            Abrir Ferramenta
+                            <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="text-6xl mb-6">💰</div>
-                
-                <h2 class="text-3xl font-bold text-white mb-3">
-                    Bank Balance Import
-                </h2>
-                
-                <p class="text-teal-200 mb-6">
-                    Gerador de saldos iniciais para importação de bancos de férias
-                </p>
-                
-                <div class="space-y-2 mb-8 text-sm text-gray-300">
-                    <div class="flex items-center">
-                        <span class="text-green-400 mr-2">✓</span>
-                        Cálculo automático de saldos CLT (2,5 dias/mês)
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-green-400 mr-2">✓</span>
-                        Opção para CARRYOVER e 13º Salário
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-green-400 mr-2">✓</span>
-                        Preview em tempo real
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-green-400 mr-2">✓</span>
-                        Formato ISO 8601 (yyyy-MM-dd)
+            </a>
+
+            <!-- Bank Balance Generator Card -->
+            <a href="./bank-balance-generator.html" class="block">
+                <div class="card-hover bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500 rounded-full blur-3xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex items-start justify-between mb-6">
+                            <div class="flex items-center justify-center w-16 h-16 bg-cyan-500/10 rounded-2xl border border-cyan-500/20">
+                                <svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full border border-green-500/30">
+                                PRONTO
+                            </span>
+                        </div>
+
+                        <h2 class="text-3xl font-bold text-white mb-3">
+                            Bank Balance Import
+                        </h2>
+                        
+                        <p class="text-slate-400 mb-6 leading-relaxed">
+                            Gerador de saldos iniciais para importação de bancos de férias
+                        </p>
+                        
+                        <div class="space-y-2 mb-6">
+                            <div class="flex items-center text-sm text-slate-300">
+                                <svg class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Cálculo CLT (2,5 dias/mês)
+                            </div>
+                            <div class="flex items-center text-sm text-slate-300">
+                                <svg class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Bancos opcionais configuráveis
+                            </div>
+                            <div class="flex items-center text-sm text-slate-300">
+                                <svg class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Preview em tempo real
+                            </div>
+                            <div class="flex items-center text-sm text-slate-300">
+                                <svg class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Formato ISO 8601 padrão
+                            </div>
+                        </div>
+
+                        <div class="flex items-center text-cyan-400 font-semibold group-hover:text-cyan-300 transition-colors">
+                            Abrir Ferramenta
+                            <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
-                
-                <a href="./bank-balance-generator.html" 
-                   class="block w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-6 rounded-xl text-center transition-all duration-200 transform hover:scale-105 shadow-lg">
-                    Abrir Ferramenta →
-                </a>
-            </div>
+            </a>
         </div>
 
-        <!-- Quick Start Guide -->
-        <div class="max-w-4xl mx-auto bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700 mb-12">
-            <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
-                <span class="text-3xl mr-3">📋</span>
-                Guia de Implementação Rápida
-            </h3>
+        <!-- Implementation Guide -->
+        <div class="max-w-4xl mx-auto bg-slate-800/50 backdrop-blur-xl rounded-3xl p-8 border border-slate-700 mb-12">
+            <div class="flex items-center mb-6">
+                <div class="flex items-center justify-center w-12 h-12 bg-purple-500/10 rounded-xl border border-purple-500/20 mr-4">
+                    <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Guia de Implementação</h3>
+            </div>
             
             <div class="space-y-4">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                        1
-                    </div>
+                <div class="flex items-start bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+                    <div class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm mr-4">1</div>
                     <div>
                         <h4 class="text-white font-semibold mb-1">Gerar LD57 (Períodos Aquisitivos)</h4>
-                        <p class="text-gray-400 text-sm">Configure a data de Go-Live e faça upload do emp_import.csv</p>
+                        <p class="text-slate-400 text-sm">Configure a data de Go-Live e faça upload do emp_import.csv</p>
                     </div>
                 </div>
                 
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                        2
-                    </div>
+                <div class="flex items-start bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+                    <div class="flex-shrink-0 w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center text-white font-bold text-sm mr-4">2</div>
                     <div>
                         <h4 class="text-white font-semibold mb-1">Gerar Bank Balance (Saldos)</h4>
-                        <p class="text-gray-400 text-sm">Use a mesma data de Go-Live e configure bancos opcionais</p>
+                        <p class="text-slate-400 text-sm">Use a mesma data de Go-Live e configure bancos opcionais</p>
                     </div>
                 </div>
                 
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                        3
-                    </div>
+                <div class="flex items-start bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+                    <div class="flex-shrink-0 w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm mr-4">3</div>
                     <div>
                         <h4 class="text-white font-semibold mb-1">Importar no WFS</h4>
-                        <p class="text-gray-400 text-sm">Importe os arquivos via LD Upload Utility e Bank Balance Import</p>
+                        <p class="text-slate-400 text-sm">Importe via LD Upload Utility e Bank Balance Import</p>
                     </div>
                 </div>
                 
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                        4
-                    </div>
+                <div class="flex items-start bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+                    <div class="flex-shrink-0 w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-sm mr-4">4</div>
                     <div>
                         <h4 class="text-white font-semibold mb-1">Calcular Timesheets</h4>
-                        <p class="text-gray-400 text-sm">Execute o cálculo de timesheet e valide os saldos</p>
+                        <p class="text-slate-400 text-sm">Execute cálculo de timesheet e valide os saldos</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Features Section -->
+        <!-- Features -->
         <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div class="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700 text-center">
-                <div class="text-4xl mb-3">⚡</div>
+            <div class="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700 text-center">
+                <div class="flex items-center justify-center w-14 h-14 bg-blue-500/10 rounded-2xl border border-blue-500/20 mx-auto mb-4">
+                    <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
                 <h4 class="text-white font-bold mb-2">100% Offline</h4>
-                <p class="text-gray-400 text-sm">Funciona completamente no navegador, sem envio de dados</p>
+                <p class="text-slate-400 text-sm">Funciona completamente no navegador, sem envio de dados</p>
             </div>
             
-            <div class="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700 text-center">
-                <div class="text-4xl mb-3">🎯</div>
+            <div class="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700 text-center">
+                <div class="flex items-center justify-center w-14 h-14 bg-cyan-500/10 rounded-2xl border border-cyan-500/20 mx-auto mb-4">
+                    <svg class="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
                 <h4 class="text-white font-bold mb-2">Conformidade CLT</h4>
-                <p class="text-gray-400 text-sm">Cálculos alinhados com legislação trabalhista brasileira</p>
+                <p class="text-slate-400 text-sm">Cálculos alinhados com legislação trabalhista brasileira</p>
             </div>
             
-            <div class="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700 text-center">
-                <div class="text-4xl mb-3">🚀</div>
+            <div class="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700 text-center">
+                <div class="flex items-center justify-center w-14 h-14 bg-purple-500/10 rounded-2xl border border-purple-500/20 mx-auto mb-4">
+                    <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
                 <h4 class="text-white font-bold mb-2">Pronto para Go-Live</h4>
-                <p class="text-gray-400 text-sm">Arquivos testados e validados para importação WFS</p>
-            </div>
-        </div>
-
-        <!-- Requirements -->
-        <div class="max-w-4xl mx-auto bg-yellow-900/20 backdrop-blur-sm rounded-2xl p-8 border border-yellow-700/50 mb-12">
-            <h3 class="text-xl font-bold text-yellow-300 mb-4 flex items-center">
-                <span class="text-2xl mr-3">⚠️</span>
-                Requisitos do Arquivo de Entrada
-            </h3>
-            
-            <div class="bg-slate-900/50 rounded-lg p-4 mb-4">
-                <code class="text-green-400 text-sm">
-                    EXTERNAL_HR_ID,LATEST_ASSIGNMENT_BEGIN_DATE,POLICY_PROFILE<br>
-                    1,2023-02-10,PP1<br>
-                    2,2023-02-10,PP2<br>
-                    47,2023-01-20,PP3
-                </code>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                    <div class="text-yellow-300 font-semibold mb-1">EXTERNAL_HR_ID</div>
-                    <div class="text-gray-400">ID do funcionário (numérico)</div>
-                </div>
-                <div>
-                    <div class="text-yellow-300 font-semibold mb-1">LATEST_ASSIGNMENT_BEGIN_DATE</div>
-                    <div class="text-gray-400">Data de admissão (YYYY-MM-DD)</div>
-                </div>
-                <div>
-                    <div class="text-yellow-300 font-semibold mb-1">POLICY_PROFILE</div>
-                    <div class="text-gray-400">Perfil de política (PP1, PP2, etc.)</div>
-                </div>
+                <p class="text-slate-400 text-sm">Arquivos testados e validados para importação WFS</p>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="text-center">
-            <div class="inline-block bg-slate-800/50 backdrop-blur-sm rounded-2xl px-8 py-6 border border-slate-700">
-                <p class="text-gray-400 mb-2">
-                    🎓 Desenvolvido por <strong class="text-white">Consultor Sênior WFS</strong>
+            <div class="inline-block bg-slate-800/50 backdrop-blur-xl rounded-2xl px-8 py-6 border border-slate-700">
+                <p class="text-slate-400 mb-2">
+                    Desenvolvido por <strong class="text-white">Consultor Sênior WFS</strong>
                 </p>
-                <p class="text-gray-500 text-sm mb-4">
+                <p class="text-slate-500 text-sm mb-4">
                     20 anos de experiência em Time & Attendance | Especialista em legislação trabalhista brasileira
                 </p>
-                <div class="flex items-center justify-center space-x-6 text-sm text-gray-400">
-                    <a href="https://github.com/leonardocorreiasap-art" target="_blank" class="hover:text-white transition-colors">
-                        <span class="mr-2">🔗</span>GitHub
+                <div class="flex items-center justify-center space-x-6 text-sm text-slate-400">
+                    <a href="https://github.com/leonardocorreiasap-art" target="_blank" class="hover:text-white transition-colors flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+                        </svg>
+                        GitHub
                     </a>
-                    <span class="text-gray-600">|</span>
-                    <span>
-                        <span class="mr-2">📅</span>Versão 2.0.0 - Outubro 2025
+                    <span class="text-slate-600">|</span>
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Versão 2.0.0 - Outubro 2025
                     </span>
                 </div>
             </div>
