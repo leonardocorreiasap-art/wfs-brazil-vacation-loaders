@@ -14,7 +14,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState } = React;
 
         function App() {
             const [goLiveDate, setGoLiveDate] = useState('2025-08-01');
@@ -27,12 +27,10 @@
             const parseDate = (dateStr) => {
                 if (!dateStr) return null;
                 
-                // Formato YYYY-MM-DD
                 if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
                     return new Date(dateStr);
                 }
                 
-                // Formato DD/MM/YYYY
                 if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
                     const [day, month, year] = dateStr.split('/');
                     return new Date(year, month - 1, day);
@@ -58,7 +56,6 @@
                 
                 let periodStart = new Date(admission);
                 
-                // Encontrar o período aquisitivo vigente
                 while (true) {
                     const periodEnd = new Date(periodStart);
                     periodEnd.setFullYear(periodEnd.getFullYear() + 1);
@@ -97,27 +94,23 @@
                             const admissionDateStr = row.LATEST_ASSIGNMENT_BEGIN_DATE?.trim();
                             const policyProfile = row.POLICY_PROFILE?.trim();
 
-                            // Excluir estagiários (PP7)
                             if (policyProfile === 'PP7') {
                                 excluded.interns++;
                                 return;
                             }
 
-                            // Validar data
                             const admissionDate = parseDate(admissionDateStr);
                             if (!admissionDate) {
                                 excluded.invalidDates++;
                                 return;
                             }
 
-                            // Excluir duplicados
                             if (seenIds.has(empId)) {
                                 excluded.duplicates++;
                                 return;
                             }
                             seenIds.add(empId);
 
-                            // Calcular período aquisitivo
                             const period = calculateAcquisitivePeriod(admissionDate, goLive);
 
                             processed.push({
@@ -181,8 +174,7 @@
                     data: data.map(row => headers.map(h => row[h]))
                 });
 
-                // Adicionar 2 linhas de header padrão WFS
-                const finalCSV = `\n\n${csv}`;
+                const finalCSV = '\n\n' + csv;
                 
                 const blob = new Blob([finalCSV], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
@@ -200,7 +192,6 @@
             return (
                 <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
                     <div className="max-w-6xl mx-auto">
-                        {/* Header */}
                         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
                             <h1 className="text-4xl font-bold text-indigo-900 mb-2">
                                 🏖️ LD57 - Vacation Initialization Generator
@@ -210,7 +201,6 @@
                             </p>
                         </div>
 
-                        {/* Configuração */}
                         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
                             <h2 className="text-2xl font-bold text-gray-800 mb-4">⚙️ Configuração</h2>
                             
@@ -241,7 +231,6 @@
                             </div>
                         </div>
 
-                        {/* Estatísticas */}
                         {stats && (
                             <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
                                 <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Estatísticas</h2>
@@ -270,7 +259,6 @@
                             </div>
                         )}
 
-                        {/* Preview */}
                         {preview.length > 0 && (
                             <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
                                 <h2 className="text-2xl font-bold text-gray-800 mb-4">👀 Preview (10 primeiros registros)</h2>
@@ -300,7 +288,6 @@
                             </div>
                         )}
 
-                        {/* Download */}
                         {data.length > 0 && (
                             <div className="bg-white rounded-lg shadow-lg p-8 text-center">
                                 <button
@@ -312,7 +299,6 @@
                             </div>
                         )}
 
-                        {/* Footer */}
                         <div className="mt-8 text-center text-gray-600 text-sm">
                             <p>🎓 Desenvolvido por Consultor Sênior WFS | 20 anos de experiência em Time & Attendance</p>
                             <p className="mt-2">✅ Conformidade CLT | ✅ Boas práticas WFS | ✅ Automação de Go-Live</p>
