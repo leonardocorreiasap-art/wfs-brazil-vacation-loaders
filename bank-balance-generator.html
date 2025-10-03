@@ -7,8 +7,8 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <div id="root"></div>
@@ -45,7 +45,7 @@
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
+                return year + '-' + month + '-' + day;
             };
 
             const formatEmployeeId = (id) => {
@@ -88,92 +88,97 @@
             const processFile = (fileContent) => {
                 setProcessing(true);
                 
-                Papa.parse(fileContent, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: (results) => {
-                        const goLive = new Date(goLiveDate);
-                        const processed = [];
-                        const excluded = {
-                            interns: 0,
-                            invalidDates: 0,
-                            duplicates: 0
-                        };
-                        const seenIds = new Set();
+                try {
+                    Papa.parse(fileContent, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                            const goLive = new Date(goLiveDate);
+                            const processed = [];
+                            const excluded = {
+                                interns: 0,
+                                invalidDates: 0,
+                                duplicates: 0
+                            };
+                            const seenIds = new Set();
 
-                        results.data.forEach(row => {
-                            const empId = row.EXTERNAL_HR_ID?.trim();
-                            const admissionDateStr = row.LATEST_ASSIGNMENT_BEGIN_DATE?.trim();
-                            const policyProfile = row.POLICY_PROFILE?.trim();
+                            results.data.forEach(row => {
+                                const empId = row.EXTERNAL_HR_ID ? row.EXTERNAL_HR_ID.trim() : null;
+                                const admissionDateStr = row.LATEST_ASSIGNMENT_BEGIN_DATE ? row.LATEST_ASSIGNMENT_BEGIN_DATE.trim() : null;
+                                const policyProfile = row.POLICY_PROFILE ? row.POLICY_PROFILE.trim() : null;
 
-                            if (policyProfile === 'PP7') {
-                                excluded.interns++;
-                                return;
-                            }
+                                if (policyProfile === 'PP7') {
+                                    excluded.interns++;
+                                    return;
+                                }
 
-                            const admissionDate = parseDate(admissionDateStr);
-                            if (!admissionDate) {
-                                excluded.invalidDates++;
-                                return;
-                            }
+                                const admissionDate = parseDate(admissionDateStr);
+                                if (!admissionDate) {
+                                    excluded.invalidDates++;
+                                    return;
+                                }
 
-                            if (seenIds.has(empId)) {
-                                excluded.duplicates++;
-                                return;
-                            }
-                            seenIds.add(empId);
+                                if (seenIds.has(empId)) {
+                                    excluded.duplicates++;
+                                    return;
+                                }
+                                seenIds.add(empId);
 
-                            const balances = calculateBalances(admissionDate, goLive);
-                            const formattedEmpId = formatEmployeeId(empId);
-                            const asOfDate = formatDateISO(goLive);
+                                const balances = calculateBalances(admissionDate, goLive);
+                                const formattedEmpId = formatEmployeeId(empId);
+                                const asOfDate = formatDateISO(goLive);
 
-                            processed.push({
-                                EMPLOYEE_ID: formattedEmpId,
-                                BANK: 'EXT_BRA_VACATION_ACCRUAL_BANK',
-                                BALANCE: balances.accrual,
-                                AS_OF_DATE: asOfDate
-                            });
-
-                            processed.push({
-                                EMPLOYEE_ID: formattedEmpId,
-                                BANK: 'EXT_BRA_VACATION_ENTITLEMENT_BANK',
-                                BALANCE: balances.entitlement,
-                                AS_OF_DATE: asOfDate
-                            });
-
-                            if (includeCarryover) {
                                 processed.push({
                                     EMPLOYEE_ID: formattedEmpId,
-                                    BANK: 'EXT_BRA_VACATION_CARRYOVER_BANK',
-                                    BALANCE: balances.carryover,
+                                    BANK: 'EXT_BRA_VACATION_ACCRUAL_BANK',
+                                    BALANCE: balances.accrual,
                                     AS_OF_DATE: asOfDate
                                 });
-                            }
 
-                            if (includeThirteenth) {
                                 processed.push({
                                     EMPLOYEE_ID: formattedEmpId,
-                                    BANK: 'EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK',
-                                    BALANCE: balances.thirteenth,
+                                    BANK: 'EXT_BRA_VACATION_ENTITLEMENT_BANK',
+                                    BALANCE: balances.entitlement,
                                     AS_OF_DATE: asOfDate
                                 });
-                            }
-                        });
 
-                        setData(processed);
-                        setPreview(processed.slice(0, 12));
-                        setStats({
-                            total: processed.length,
-                            employees: seenIds.size,
-                            excluded
-                        });
-                        setProcessing(false);
-                    },
-                    error: (error) => {
-                        alert('Erro ao processar arquivo: ' + error.message);
-                        setProcessing(false);
-                    }
-                });
+                                if (includeCarryover) {
+                                    processed.push({
+                                        EMPLOYEE_ID: formattedEmpId,
+                                        BANK: 'EXT_BRA_VACATION_CARRYOVER_BANK',
+                                        BALANCE: balances.carryover,
+                                        AS_OF_DATE: asOfDate
+                                    });
+                                }
+
+                                if (includeThirteenth) {
+                                    processed.push({
+                                        EMPLOYEE_ID: formattedEmpId,
+                                        BANK: 'EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK',
+                                        BALANCE: balances.thirteenth,
+                                        AS_OF_DATE: asOfDate
+                                    });
+                                }
+                            });
+
+                            setData(processed);
+                            setPreview(processed.slice(0, 12));
+                            setStats({
+                                total: processed.length,
+                                employees: seenIds.size,
+                                excluded
+                            });
+                            setProcessing(false);
+                        },
+                        error: (error) => {
+                            alert('Erro ao processar arquivo: ' + error.message);
+                            setProcessing(false);
+                        }
+                    });
+                } catch (error) {
+                    alert('Erro ao processar arquivo: ' + error.message);
+                    setProcessing(false);
+                }
             };
 
             const handleFileUpload = (e) => {
@@ -183,6 +188,10 @@
                     const reader = new FileReader();
                     reader.onload = (event) => {
                         processFile(event.target.result);
+                    };
+                    reader.onerror = () => {
+                        alert('Erro ao ler arquivo');
+                        setProcessing(false);
                     };
                     reader.readAsText(uploadedFile);
                 }
@@ -206,286 +215,116 @@
                 const timestamp = new Date().toISOString().split('T')[0];
                 
                 link.setAttribute('href', url);
-                link.setAttribute('download', `BANK_BALANCE_IMPORT_${timestamp}.csv`);
+                link.setAttribute('download', 'BANK_BALANCE_IMPORT_' + timestamp + '.csv');
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
             };
 
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 p-8">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-                            <h1 className="text-4xl font-bold text-teal-900 mb-2">
-                                💰 Bank Balance Import Generator
-                            </h1>
-                            <p className="text-gray-600">
-                                Gerador de saldos iniciais para bancos de férias (CLT)
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-                            <h2 className="text-2xl font-bold text-gray-800 mb-4">⚙️ Configuração</h2>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        📅 Data de Go-Live
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={goLiveDate}
-                                        onChange={(e) => setGoLiveDate(e.target.value)}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        📁 Upload emp_import.csv
-                                    </label>
-                                    <input
-                                        type="file"
-                                        accept=".csv"
-                                        onChange={handleFileUpload}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="border-t pt-6">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-4">🏦 Bancos Opcionais</h3>
-                                
-                                <div className="space-y-4">
-                                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                                        <label className="flex items-start cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={includeCarryover}
-                                                onChange={(e) => setIncludeCarryover(e.target.checked)}
-                                                className="mt-1 mr-3 h-5 w-5 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-                                            />
-                                            <div>
-                                                <div className="font-semibold text-gray-800">
-                                                    EXT_BRA_VACATION_CARRYOVER_BANK
-                                                </div>
-                                                <div className="text-sm text-gray-600 mt-1">
-                                                    ⚠️ Marque SOMENTE se houver férias vencidas a migrar de sistemas anteriores. 
-                                                    Na maioria dos Go-Lives, começar com saldo zero.
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-
-                                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-                                        <label className="flex items-start cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={includeThirteenth}
-                                                onChange={(e) => setIncludeThirteenth(e.target.checked)}
-                                                className="mt-1 mr-3 h-5 w-5 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-                                            />
-                                            <div>
-                                                <div className="font-semibold text-gray-800">
-                                                    EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK
-                                                </div>
-                                                <div className="text-sm text-gray-600 mt-1">
-                                                    ℹ️ Marque se o WFS gerenciará adiantamentos do 13º salário. 
-                                                    Saldo inicial: 1.0 (um adiantamento disponível por ano).
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {stats && (
-                            <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-                                <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Estatísticas</h2>
-                                
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="bg-green-100 p-4 rounded-lg">
-                                        <div className="text-3xl font-bold text-green-800">{stats.total}</div>
-                                        <div className="text-sm text-green-600">Registros de Saldo</div>
-                                    </div>
-                                    
-                                    <div className="bg-blue-100 p-4 rounded-lg">
-                                        <div className="text-3xl font-bold text-blue-800">{stats.employees}</div>
-                                        <div className="text-sm text-blue-600">Funcionários</div>
-                                    </div>
-                                    
-                                    <div className="bg-yellow-100 p-4 rounded-lg">
-                                        <div className="text-3xl font-bold text-yellow-800">{stats.excluded.interns}</div>
-                                        <div className="text-sm text-yellow-600">Estagiários (PP7)</div>
-                                    </div>
-                                    
-                                    <div className="bg-red-100 p-4 rounded-lg">
-                                        <div className="text-3xl font-bold text-red-800">{stats.excluded.invalidDates + stats.excluded.duplicates}</div>
-                                        <div className="text-sm text-red-600">Excluídos</div>
-                                    </div>
-                                </div>
-
-                                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="bg-teal-50 p-3 rounded border border-teal-200">
-                                        <div className="text-xs text-teal-600 font-semibold">ACCRUAL</div>
-                                        <div className="text-lg font-bold text-teal-800">{stats.employees}</div>
-                                    </div>
-                                    
-                                    <div className="bg-teal-50 p-3 rounded border border-teal-200">
-                                        <div className="text-xs text-teal-600 font-semibold">ENTITLEMENT</div>
-                                        <div className="text-lg font-bold text-teal-800">{stats.employees}</div>
-                                    </div>
-                                    
-                                    {includeCarryover && (
-                                        <div className="bg-yellow-50 p-3 rounded border border-yellow-200">
-                                            <div className="text-xs text-yellow-600 font-semibold">CARRYOVER</div>
-                                            <div className="text-lg font-bold text-yellow-800">{stats.employees}</div>
-                                        </div>
-                                    )}
-                                    
-                                    {includeThirteenth && (
-                                        <div className="bg-blue-50 p-3 rounded border border-blue-200">
-                                            <div className="text-xs text-blue-600 font-semibold">13º SALÁRIO</div>
-                                            <div className="text-lg font-bold text-blue-800">{stats.employees}</div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {preview.length > 0 && (
-                            <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-                                <h2 className="text-2xl font-bold text-gray-800 mb-4">👀 Preview (12 primeiros registros)</h2>
-                                
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee ID</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bank</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">As Of Date</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
-                                            {preview.map((row, idx) => (
-                                                <tr key={idx} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.EMPLOYEE_ID}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600">
-                                                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                                                            row.BANK.includes('ACCRUAL') && !row.BANK.includes('CARRYOVER') ? 'bg-teal-100 text-teal-800' :
-                                                            row.BANK.includes('ENTITLEMENT') ? 'bg-green-100 text-green-800' :
-                                                            row.BANK.includes('CARRYOVER') ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-blue-100 text-blue-800'
-                                                        }`}>
-                                                            {row.BANK.replace('EXT_BRA_VACATION_', '').replace('_BANK', '')}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-sm text-gray-900 font-semibold">{row.BALANCE}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.AS_OF_DATE}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
-
-                        {data.length > 0 && (
-                            <div className="bg-white rounded-lg shadow-lg p-8">
-                                <div className="text-center mb-6">
-                                    <div className="inline-block bg-teal-50 border border-teal-200 rounded-lg p-4 mb-4">
-                                        <div className="text-sm text-teal-700 font-medium">
-                                            📦 Pronto para exportar
-                                        </div>
-                                        <div className="text-2xl font-bold text-teal-900 mt-1">
-                                            {data.length} registros de saldo | {stats.employees} funcionários
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div className="text-center">
-                                    <button
-                                        onClick={downloadCSV}
-                                        className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition duration-200 transform hover:scale-105 shadow-lg"
-                                    >
-                                        ⬇️ Baixar CSV
-                                    </button>
-                                </div>
-
-                                <div className="mt-8 bg-blue-50 border-l-4 border-blue-400 p-6 rounded">
-                                    <h3 className="font-semibold text-blue-900 mb-3">📋 Próximos Passos:</h3>
-                                    <ol className="space-y-2 text-sm text-blue-800">
-                                        <li>1️⃣ Certifique-se de que o <strong>LD57</strong> foi importado primeiro</li>
-                                        <li>2️⃣ Importe este arquivo via <strong>Bank Balance Import</strong> no WFS</li>
-                                        <li>3️⃣ Execute o <strong>cálculo de timesheet</strong> para o período</li>
-                                        <li>4️⃣ Valide os saldos nos <strong>relatórios de bancos</strong></li>
-                                    </ol>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="mt-8 bg-white rounded-lg shadow-lg p-8">
-                            <h2 className="text-2xl font-bold text-gray-800 mb-4">🧮 Lógica de Cálculo CLT</h2>
-                            
-                            <div className="space-y-4">
-                                <div className="border-l-4 border-teal-500 pl-4">
-                                    <h3 className="font-semibold text-gray-800 mb-2">
-                                        EXT_BRA_VACATION_ACCRUAL_BANK
-                                    </h3>
-                                    <p className="text-sm text-gray-600">
-                                        <strong>Cálculo:</strong> 2,5 dias por mês trabalhado no período aquisitivo vigente<br/>
-                                        <strong>Exemplo:</strong> Admitido em 01/02/2025, Go-Live em 01/08/2025<br/>
-                                        → 6 meses trabalhados × 2,5 = <strong>15,00 dias</strong>
-                                    </p>
-                                </div>
-
-                                <div className="border-l-4 border-green-500 pl-4">
-                                    <h3 className="font-semibold text-gray-800 mb-2">
-                                        EXT_BRA_VACATION_ENTITLEMENT_BANK
-                                    </h3>
-                                    <p className="text-sm text-gray-600">
-                                        <strong>Cálculo:</strong> 30 dias quando completa 12 meses de período aquisitivo<br/>
-                                        <strong>Transferência:</strong> Automática do banco Accrual após 12 meses<br/>
-                                        → Saldo inicial = <strong>0,00</strong> (se &lt; 12 meses) ou <strong>30,00</strong> (se ≥ 12 meses)
-                                    </p>
-                                </div>
-
-                                <div className="border-l-4 border-yellow-500 pl-4">
-                                    <h3 className="font-semibold text-gray-800 mb-2">
-                                        EXT_BRA_VACATION_CARRYOVER_BANK ⚠️ Opcional
-                                    </h3>
-                                    <p className="text-sm text-gray-600">
-                                        <strong>Propósito:</strong> Férias de períodos anteriores não utilizadas<br/>
-                                        <strong>⚠️ IMPORTANTE:</strong> Marque SOMENTE se houver certeza de que precisa 
-                                        carregar férias vencidas. Na maioria dos Go-Lives, começar com <strong>0,00</strong>
-                                    </p>
-                                </div>
-
-                                <div className="border-l-4 border-blue-500 pl-4">
-                                    <h3 className="font-semibold text-gray-800 mb-2">
-                                        EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK ⚠️ Opcional
-                                    </h3>
-                                    <p className="text-sm text-gray-600">
-                                        <strong>Valor inicial:</strong> 1.0 (um adiantamento disponível por ano)<br/>
-                                        <strong>⚠️ IMPORTANTE:</strong> Marque se o WFS gerenciará adiantamentos do 13º salário
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-8 text-center text-gray-600 text-sm">
-                            <p>🎓 Desenvolvido por Consultor Sênior WFS | 20 anos de experiência em Time & Attendance</p>
-                            <p className="mt-2">✅ Conformidade CLT | ✅ Boas práticas WFS | ✅ Automação de Go-Live</p>
-                        </div>
-                    </div>
-                </div>
+            return React.createElement('div', { className: 'min-h-screen bg-gradient-to-br from-green-50 to-teal-100 p-8' },
+                React.createElement('div', { className: 'max-w-6xl mx-auto' },
+                    React.createElement('div', { className: 'bg-white rounded-lg shadow-lg p-8 mb-8' },
+                        React.createElement('h1', { className: 'text-4xl font-bold text-teal-900 mb-2' }, '💰 Bank Balance Import Generator'),
+                        React.createElement('p', { className: 'text-gray-600' }, 'Gerador de saldos iniciais para bancos de férias (CLT)')
+                    ),
+                    
+                    React.createElement('div', { className: 'bg-white rounded-lg shadow-lg p-8 mb-8' },
+                        React.createElement('h2', { className: 'text-2xl font-bold text-gray-800 mb-4' }, '⚙️ Configuração'),
+                        React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-6 mb-6' },
+                            React.createElement('div', null,
+                                React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, '📅 Data de Go-Live'),
+                                React.createElement('input', {
+                                    type: 'date',
+                                    value: goLiveDate,
+                                    onChange: (e) => setGoLiveDate(e.target.value),
+                                    className: 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
+                                })
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, '📁 Upload emp_import.csv'),
+                                React.createElement('input', {
+                                    type: 'file',
+                                    accept: '.csv',
+                                    onChange: handleFileUpload,
+                                    className: 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent'
+                                })
+                            )
+                        ),
+                        
+                        React.createElement('div', { className: 'border-t pt-6' },
+                            React.createElement('h3', { className: 'text-lg font-semibold text-gray-800 mb-4' }, '🏦 Bancos Opcionais'),
+                            React.createElement('div', { className: 'space-y-4' },
+                                React.createElement('div', { className: 'bg-yellow-50 border-l-4 border-yellow-400 p-4' },
+                                    React.createElement('label', { className: 'flex items-start cursor-pointer' },
+                                        React.createElement('input', {
+                                            type: 'checkbox',
+                                            checked: includeCarryover,
+                                            onChange: (e) => setIncludeCarryover(e.target.checked),
+                                            className: 'mt-1 mr-3 h-5 w-5'
+                                        }),
+                                        React.createElement('div', null,
+                                            React.createElement('div', { className: 'font-semibold text-gray-800' }, 'EXT_BRA_VACATION_CARRYOVER_BANK'),
+                                            React.createElement('div', { className: 'text-sm text-gray-600 mt-1' }, '⚠️ Marque SOMENTE se houver férias vencidas a migrar.')
+                                        )
+                                    )
+                                ),
+                                React.createElement('div', { className: 'bg-blue-50 border-l-4 border-blue-400 p-4' },
+                                    React.createElement('label', { className: 'flex items-start cursor-pointer' },
+                                        React.createElement('input', {
+                                            type: 'checkbox',
+                                            checked: includeThirteenth,
+                                            onChange: (e) => setIncludeThirteenth(e.target.checked),
+                                            className: 'mt-1 mr-3 h-5 w-5'
+                                        }),
+                                        React.createElement('div', null,
+                                            React.createElement('div', { className: 'font-semibold text-gray-800' }, 'EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK'),
+                                            React.createElement('div', { className: 'text-sm text-gray-600 mt-1' }, 'ℹ️ Marque se o WFS gerenciará 13º salário.')
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    
+                    stats && React.createElement('div', { className: 'bg-white rounded-lg shadow-lg p-8 mb-8' },
+                        React.createElement('h2', { className: 'text-2xl font-bold text-gray-800 mb-4' }, '📊 Estatísticas'),
+                        React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-4' },
+                            React.createElement('div', { className: 'bg-green-100 p-4 rounded-lg' },
+                                React.createElement('div', { className: 'text-3xl font-bold text-green-800' }, stats.total),
+                                React.createElement('div', { className: 'text-sm text-green-600' }, 'Registros')
+                            ),
+                            React.createElement('div', { className: 'bg-blue-100 p-4 rounded-lg' },
+                                React.createElement('div', { className: 'text-3xl font-bold text-blue-800' }, stats.employees),
+                                React.createElement('div', { className: 'text-sm text-blue-600' }, 'Funcionários')
+                            ),
+                            React.createElement('div', { className: 'bg-yellow-100 p-4 rounded-lg' },
+                                React.createElement('div', { className: 'text-3xl font-bold text-yellow-800' }, stats.excluded.interns),
+                                React.createElement('div', { className: 'text-sm text-yellow-600' }, 'Estagiários')
+                            ),
+                            React.createElement('div', { className: 'bg-red-100 p-4 rounded-lg' },
+                                React.createElement('div', { className: 'text-3xl font-bold text-red-800' }, stats.excluded.invalidDates + stats.excluded.duplicates),
+                                React.createElement('div', { className: 'text-sm text-red-600' }, 'Excluídos')
+                            )
+                        )
+                    ),
+                    
+                    data.length > 0 && React.createElement('div', { className: 'bg-white rounded-lg shadow-lg p-8 text-center' },
+                        React.createElement('button', {
+                            onClick: downloadCSV,
+                            className: 'bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-8 rounded-lg text-lg'
+                        }, '⬇️ Baixar CSV (' + data.length + ' registros)')
+                    )
+                )
             );
         }
 
-        ReactDOM.render(<App />, document.getElementById('root'));
+        // Aguardar carregamento completo
+        if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined' && typeof Papa !== 'undefined') {
+            ReactDOM.render(React.createElement(App), document.getElementById('root'));
+        } else {
+            document.getElementById('root').innerHTML = '<div style="padding: 50px; text-align: center; color: red;">Erro ao carregar bibliotecas. Recarregue a página.</div>';
+        }
     </script>
 </body>
 </html>
