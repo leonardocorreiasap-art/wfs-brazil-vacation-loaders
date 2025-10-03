@@ -128,6 +128,7 @@
                                 const formattedEmpId = formatEmployeeId(empId);
                                 const asOfDate = formatDateISO(goLive);
 
+                                // Sempre adicionar Accrual e Entitlement
                                 processed.push({
                                     EMPLOYEE_ID: formattedEmpId,
                                     BANK: 'EXT_BRA_VACATION_ACCRUAL_BANK',
@@ -141,25 +142,31 @@
                                     BALANCE: balances.entitlement,
                                     AS_OF_DATE: asOfDate
                                 });
-
-                                if (includeCarryover) {
-                                    processed.push({
-                                        EMPLOYEE_ID: formattedEmpId,
-                                        BANK: 'EXT_BRA_VACATION_CARRYOVER_BANK',
-                                        BALANCE: balances.carryover,
-                                        AS_OF_DATE: asOfDate
-                                    });
-                                }
-
-                                if (includeThirteenth) {
-                                    processed.push({
-                                        EMPLOYEE_ID: formattedEmpId,
-                                        BANK: 'EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK',
-                                        BALANCE: balances.thirteenth,
-                                        AS_OF_DATE: asOfDate
-                                    });
-                                }
                             });
+
+                            // Adicionar Carryover se marcado
+                            if (includeCarryover) {
+                                seenIds.forEach(empId => {
+                                    processed.push({
+                                        EMPLOYEE_ID: formatEmployeeId(empId),
+                                        BANK: 'EXT_BRA_VACATION_CARRYOVER_BANK',
+                                        BALANCE: '0.00',
+                                        AS_OF_DATE: formatDateISO(goLive)
+                                    });
+                                });
+                            }
+
+                            // Adicionar 13º Salário se marcado
+                            if (includeThirteenth) {
+                                seenIds.forEach(empId => {
+                                    processed.push({
+                                        EMPLOYEE_ID: formatEmployeeId(empId),
+                                        BANK: 'EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK',
+                                        BALANCE: '1.0',
+                                        AS_OF_DATE: formatDateISO(goLive)
+                                    });
+                                });
+                            }
 
                             setData(processed);
                             setPreview(processed.slice(0, 12));
@@ -314,6 +321,53 @@
                             onClick: downloadCSV,
                             className: 'bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-8 rounded-lg text-lg'
                         }, '⬇️ Baixar CSV (' + data.length + ' registros)')
+                    ),
+                    
+                    React.createElement('div', { className: 'mt-8 bg-white rounded-lg shadow-lg p-8' },
+                        React.createElement('h2', { className: 'text-2xl font-bold text-gray-800 mb-4' }, '🧮 Lógica de Cálculo CLT'),
+                        React.createElement('div', { className: 'space-y-4' },
+                            React.createElement('div', { className: 'border-l-4 border-teal-500 pl-4' },
+                                React.createElement('h3', { className: 'font-semibold text-gray-800 mb-2' }, 'EXT_BRA_VACATION_ACCRUAL_BANK'),
+                                React.createElement('p', { className: 'text-sm text-gray-600' },
+                                    React.createElement('strong', null, 'Cálculo: '), '2,5 dias por mês trabalhado no período aquisitivo vigente',
+                                    React.createElement('br'),
+                                    React.createElement('strong', null, 'Exemplo: '), 'Admitido em 01/02/2025, Go-Live em 01/08/2025',
+                                    React.createElement('br'),
+                                    '→ 6 meses trabalhados × 2,5 = ', React.createElement('strong', null, '15,00 dias')
+                                )
+                            ),
+                            React.createElement('div', { className: 'border-l-4 border-green-500 pl-4' },
+                                React.createElement('h3', { className: 'font-semibold text-gray-800 mb-2' }, 'EXT_BRA_VACATION_ENTITLEMENT_BANK'),
+                                React.createElement('p', { className: 'text-sm text-gray-600' },
+                                    React.createElement('strong', null, 'Cálculo: '), '30 dias quando completa 12 meses de período aquisitivo',
+                                    React.createElement('br'),
+                                    React.createElement('strong', null, 'Transferência: '), 'Automática do banco Accrual após 12 meses',
+                                    React.createElement('br'),
+                                    '→ Saldo inicial = ', React.createElement('strong', null, '0,00'), ' (se < 12 meses) ou ', React.createElement('strong', null, '30,00'), ' (se ≥ 12 meses)'
+                                )
+                            ),
+                            React.createElement('div', { className: 'border-l-4 border-yellow-500 pl-4' },
+                                React.createElement('h3', { className: 'font-semibold text-gray-800 mb-2' }, 'EXT_BRA_VACATION_CARRYOVER_BANK ⚠️ Opcional'),
+                                React.createElement('p', { className: 'text-sm text-gray-600' },
+                                    React.createElement('strong', null, 'Propósito: '), 'Férias de períodos anteriores não utilizadas',
+                                    React.createElement('br'),
+                                    React.createElement('strong', null, '⚠️ IMPORTANTE: '), 'Marque SOMENTE se houver certeza de que precisa carregar férias vencidas. Na maioria dos Go-Lives, começar com ', React.createElement('strong', null, '0,00')
+                                )
+                            ),
+                            React.createElement('div', { className: 'border-l-4 border-blue-500 pl-4' },
+                                React.createElement('h3', { className: 'font-semibold text-gray-800 mb-2' }, 'EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK ⚠️ Opcional'),
+                                React.createElement('p', { className: 'text-sm text-gray-600' },
+                                    React.createElement('strong', null, 'Valor inicial: '), '1.0 (um adiantamento disponível por ano)',
+                                    React.createElement('br'),
+                                    React.createElement('strong', null, '⚠️ IMPORTANTE: '), 'Marque se o WFS gerenciará adiantamentos do 13º salário'
+                                )
+                            )
+                        )
+                    ),
+                    
+                    React.createElement('div', { className: 'mt-8 text-center text-gray-600 text-sm' },
+                        React.createElement('p', null, '🎓 Desenvolvido por Consultor Sênior WFS | 20 anos de experiência em Time & Attendance'),
+                        React.createElement('p', { className: 'mt-2' }, '✅ Conformidade CLT | ✅ Boas práticas WFS | ✅ Automação de Go-Live')
                     )
                 )
             );
