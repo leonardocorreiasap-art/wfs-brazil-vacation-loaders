@@ -114,18 +114,18 @@
                             const period = calculateAcquisitivePeriod(admissionDate, goLive);
 
                             processed.push({
-                                EMPLOYEE_ID: formatEmployeeId(empId),
-                                ACCRUAL_CODE: 'EXT_BRA_VACATION_ACCRUAL',
-                                ENTITLEMENT_CODE: 'EXT_BRA_VACATION_ENTITLEMENT',
-                                ACCRUAL_BANK: 'EXT_BRA_VACATION_ACCRUAL_BANK',
-                                ENTITLEMENT_BANK: 'EXT_BRA_VACATION_ENTITLEMENT_BANK',
-                                CARRYOVER_BANK: 'EXT_BRA_VACATION_CARRYOVER_BANK',
-                                ACCRUAL_EMPLOYMENT_TERM_ACCRUAL_PERIOD_TYPE: 'VACATION_YEAR',
-                                ENTITLEMENT_EMPLOYMENT_TERM_ACCRUAL_PERIOD_TYPE: 'VACATION_YEAR',
-                                EMPLOYMENT_TERM_BEGIN_DATE: formatDate(period.start),
-                                EMPLOYMENT_TERM_END_DATE: formatDate(period.end),
-                                AS_OF_DATE: formatDate(goLive),
-                                BENEFIT_YEAR_COUNT: '1'
+                                EXT_BRA_VACATION_EMPLOYEE_ID: formatEmployeeId(empId),
+                                EXT_BRA_VACATION_EFF_DT: formatDate(period.start),
+                                EXT_BRA_VACATION_END_EFF_DT: formatDate(period.end),
+                                EXT_BRA_VACATION_INITIALIZATION_DATE: formatDate(goLive),
+                                EXT_BRA_VACATION_BEGIN_DT: formatDate(period.start),
+                                EXT_BRA_VACATION_END_DT: formatDate(period.end),
+                                EXT_BRA_VACATION_ENTITLEMENT_BEGIN_DT: formatDate(period.start),
+                                EXT_BRA_VACATION_ENTITLEMENT_END_DT: formatDate(period.end),
+                                EXT_BRA_VACATION_CARRYOVER_BEGIN_DT: formatDate(period.start),
+                                EXT_BRA_VACATION_CARRYOVER_END_DT: formatDate(period.end),
+                                EXT_BRA_VACATION_SICK_LONG_TERM_DAYS: '0.0',
+                                EXT_BRA_VACATION_INITIAL_ENTITLEMENT: '0.0'
                             });
                         });
 
@@ -163,20 +163,27 @@
                 }
 
                 const headers = [
-                    'EMPLOYEE_ID', 'ACCRUAL_CODE', 'ENTITLEMENT_CODE', 'ACCRUAL_BANK',
-                    'ENTITLEMENT_BANK', 'CARRYOVER_BANK', 'ACCRUAL_EMPLOYMENT_TERM_ACCRUAL_PERIOD_TYPE',
-                    'ENTITLEMENT_EMPLOYMENT_TERM_ACCRUAL_PERIOD_TYPE', 'EMPLOYMENT_TERM_BEGIN_DATE',
-                    'EMPLOYMENT_TERM_END_DATE', 'AS_OF_DATE', 'BENEFIT_YEAR_COUNT'
+                    'EXT_BRA_VACATION_EMPLOYEE_ID',
+                    'EXT_BRA_VACATION_EFF_DT',
+                    'EXT_BRA_VACATION_END_EFF_DT',
+                    'EXT_BRA_VACATION_INITIALIZATION_DATE',
+                    'EXT_BRA_VACATION_BEGIN_DT',
+                    'EXT_BRA_VACATION_END_DT',
+                    'EXT_BRA_VACATION_ENTITLEMENT_BEGIN_DT',
+                    'EXT_BRA_VACATION_ENTITLEMENT_END_DT',
+                    'EXT_BRA_VACATION_CARRYOVER_BEGIN_DT',
+                    'EXT_BRA_VACATION_CARRYOVER_END_DT',
+                    'EXT_BRA_VACATION_SICK_LONG_TERM_DAYS',
+                    'EXT_BRA_VACATION_INITIAL_ENTITLEMENT'
                 ];
 
+                // Criar CSV sem linhas vazias no início
                 const csv = Papa.unparse({
                     fields: headers,
                     data: data.map(row => headers.map(h => row[h]))
                 });
-
-                const finalCSV = '\n\n' + csv;
                 
-                const blob = new Blob([finalCSV], { type: 'text/csv;charset=utf-8;' });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
                 const timestamp = new Date().toISOString().split('T')[0];
@@ -268,18 +275,18 @@
                                         <thead className="bg-gray-50">
                                             <tr>
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee ID</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Início Período</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fim Período</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">As Of Date</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data Início</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data Fim</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Initialization Date</th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
                                             {preview.map((row, idx) => (
                                                 <tr key={idx} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.EMPLOYEE_ID}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.EMPLOYMENT_TERM_BEGIN_DATE}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.EMPLOYMENT_TERM_END_DATE}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.AS_OF_DATE}</td>
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.EXT_BRA_VACATION_EMPLOYEE_ID}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.EXT_BRA_VACATION_BEGIN_DT}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.EXT_BRA_VACATION_END_DT}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.EXT_BRA_VACATION_INITIALIZATION_DATE}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
