@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WFS Brazil Tools - Cockpit de Ferramentas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+        }
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen">
+    <!-- Particles Background Effect -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
+        <div class="absolute top-40 right-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-20 left-40 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+
+    <div class="relative z-10 container mx-auto px-4 py-12">
+        <!-- Header -->
+        <div class="text-center mb-16 float-animation">
+            <div class="inline-block mb-6">
+                <div class="text-8xl mb-4">🚀</div>
+            </div>
+            <h1 class="text-6xl font-bold text-white mb-4 tracking-tight">
+                WFS Brazil Tools
+            </h1>
+            <p class="text-xl text-blue-300 mb-2">
+                Cockpit de Ferramentas para Workforce Software
+            </p>
+            <p class="text-sm text-gray-400">
+                Ferramentas especializadas em Time & Attendance | Conformidade CLT
+            </p>
+        </div>
+
+        <!-- Tools Grid -->
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <!-- LD57 Generator -->
+            <div class="group relative bg-gradient-to-br from-indigo-900/50 to-blue-900/50 backdrop-blur-sm rounded-2xl p-8 border border-indigo-500/30 hover:border-indigo-400 transition-all duration-300 hover:scale-105 pulse-glow">
+                <div class="absolute top-4 right-4">
+                    <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">PRONTO</span>
+                </div>
+                
+                <div class="text-6xl mb-6">🏖️</div>
+                
+                <h2 class="text-3xl font-bold text-white mb-3">
+                    LD57 Generator
+                </h2>
+                
+                <p class="text-blue-200 mb-6">
+                    Gerador de arquivo de inicialização de períodos aquisitivos de férias
+                </p>
+                
+                <div class="space-y-2 mb-8 text-sm text-gray-300">
+                    <div class="flex items-center">
+                        <span class="text-green-400 mr-2">✓</span>
+                        Cálculo automático de período aquisitivo vigente
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-400 mr-2">✓</span>
+                        Layout WFS oficial (12 colunas)
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-400 mr-2">✓</span>
+                        Exclusão automática de estagiários (PP7)
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-400 mr-2">✓</span>
+                        Formatação de Employee ID (4 dígitos)
+                    </div>
+                </div>
+                
+                <a href="./ld57-generator.html" 
+                   class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-xl text-center transition-all duration-200 transform hover:scale-105 shadow-lg">
+                    Abrir Ferramenta →
+                </a>
+            </div>
+
+            <!-- Bank Balance Generator -->
+            <div class="group relative bg-gradient-to-br from-teal-900/50 to-green-900/50 backdrop-blur-sm rounded-2xl p-8 border border-teal-500/30 hover:border-teal-400 transition-all duration-300 hover:scale-105 pulse-glow" style="animation-delay: 0.5s;">
+                <div class="absolute top-4 right-4">
+                    <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">PRONTO</span>
+                </div>
+                
+                <div class="text-6xl mb-6">💰</div>
+                
+                <h2 class="text-3xl font-bold text-white mb-3">
+                    Bank Balance Import
+                </h2>
+                
+                <p class="text-teal-200 mb-6">
+                    Gerador de saldos iniciais para importação de bancos de férias
+                </p>
+                
+                <div class="space-y-2 mb-8 text-sm text-gray-300">
+                    <div class="flex items-center">
+                        <span class="text-green-400 mr-2">✓</span>
+                        Cálculo automático de saldos CLT (2,5 dias/mês)
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-400 mr-2">✓</span>
+                        Opção para CARRYOVER e 13º Salário
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-400 mr-2">✓</span>
+                        Preview em tempo real
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-400 mr-2">✓</span>
+                        Formato ISO 8601 (yyyy-MM-dd)
+                    </div>
+                </div>
+                
+                <a href="./bank-balance-generator.html" 
+                   class="block w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-6 rounded-xl text-center transition-all duration-200 transform hover:scale-105 shadow-lg">
+                    Abrir Ferramenta →
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Start Guide -->
+        <div class="max-w-4xl mx-auto bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700 mb-12">
+            <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <span class="text-3xl mr-3">📋</span>
+                Guia de Implementação Rápida
+            </h3>
+            
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                        1
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-1">Gerar LD57 (Períodos Aquisitivos)</h4>
+                        <p class="text-gray-400 text-sm">Configure a data de Go-Live e faça upload do emp_import.csv</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                        2
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-1">Gerar Bank Balance (Saldos)</h4>
+                        <p class="text-gray-400 text-sm">Use a mesma data de Go-Live e configure bancos opcionais</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                        3
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-1">Importar no WFS</h4>
+                        <p class="text-gray-400 text-sm">Importe os arquivos via LD Upload Utility e Bank Balance Import</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                        4
+                    </div>
+                    <div>
+                        <h4 class="text-white font-semibold mb-1">Calcular Timesheets</h4>
+                        <p class="text-gray-400 text-sm">Execute o cálculo de timesheet e valide os saldos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700 text-center">
+                <div class="text-4xl mb-3">⚡</div>
+                <h4 class="text-white font-bold mb-2">100% Offline</h4>
+                <p class="text-gray-400 text-sm">Funciona completamente no navegador, sem envio de dados</p>
+            </div>
+            
+            <div class="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700 text-center">
+                <div class="text-4xl mb-3">🎯</div>
+                <h4 class="text-white font-bold mb-2">Conformidade CLT</h4>
+                <p class="text-gray-400 text-sm">Cálculos alinhados com legislação trabalhista brasileira</p>
+            </div>
+            
+            <div class="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700 text-center">
+                <div class="text-4xl mb-3">🚀</div>
+                <h4 class="text-white font-bold mb-2">Pronto para Go-Live</h4>
+                <p class="text-gray-400 text-sm">Arquivos testados e validados para importação WFS</p>
+            </div>
+        </div>
+
+        <!-- Requirements -->
+        <div class="max-w-4xl mx-auto bg-yellow-900/20 backdrop-blur-sm rounded-2xl p-8 border border-yellow-700/50 mb-12">
+            <h3 class="text-xl font-bold text-yellow-300 mb-4 flex items-center">
+                <span class="text-2xl mr-3">⚠️</span>
+                Requisitos do Arquivo de Entrada
+            </h3>
+            
+            <div class="bg-slate-900/50 rounded-lg p-4 mb-4">
+                <code class="text-green-400 text-sm">
+                    EXTERNAL_HR_ID,LATEST_ASSIGNMENT_BEGIN_DATE,POLICY_PROFILE<br>
+                    1,2023-02-10,PP1<br>
+                    2,2023-02-10,PP2<br>
+                    47,2023-01-20,PP3
+                </code>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                    <div class="text-yellow-300 font-semibold mb-1">EXTERNAL_HR_ID</div>
+                    <div class="text-gray-400">ID do funcionário (numérico)</div>
+                </div>
+                <div>
+                    <div class="text-yellow-300 font-semibold mb-1">LATEST_ASSIGNMENT_BEGIN_DATE</div>
+                    <div class="text-gray-400">Data de admissão (YYYY-MM-DD)</div>
+                </div>
+                <div>
+                    <div class="text-yellow-300 font-semibold mb-1">POLICY_PROFILE</div>
+                    <div class="text-gray-400">Perfil de política (PP1, PP2, etc.)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center">
+            <div class="inline-block bg-slate-800/50 backdrop-blur-sm rounded-2xl px-8 py-6 border border-slate-700">
+                <p class="text-gray-400 mb-2">
+                    🎓 Desenvolvido por <strong class="text-white">Consultor Sênior WFS</strong>
+                </p>
+                <p class="text-gray-500 text-sm mb-4">
+                    20 anos de experiência em Time & Attendance | Especialista em legislação trabalhista brasileira
+                </p>
+                <div class="flex items-center justify-center space-x-6 text-sm text-gray-400">
+                    <a href="https://github.com/leonardocorreiasap-art" target="_blank" class="hover:text-white transition-colors">
+                        <span class="mr-2">🔗</span>GitHub
+                    </a>
+                    <span class="text-gray-600">|</span>
+                    <span>
+                        <span class="mr-2">📅</span>Versão 2.0.0 - Outubro 2025
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

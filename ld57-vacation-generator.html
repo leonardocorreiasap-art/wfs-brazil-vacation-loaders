@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LD57 - Vacation Initialization Generator | WFS Brazil</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [goLiveDate, setGoLiveDate] = useState('2025-08-01');
+            const [file, setFile] = useState(null);
+            const [data, setData] = useState([]);
+            const [stats, setStats] = useState(null);
+            const [preview, setPreview] = useState([]);
+            const [processing, setProcessing] = useState(false);
+
+            const parseDate = (dateStr) => {
+                if (!dateStr) return null;
+                
+                // Formato YYYY-MM-DD
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                    return new Date(dateStr);
+                }
+                
+                // Formato DD/MM/YYYY
+                if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+                    const [day, month, year] = dateStr.split('/');
+                    return new Date(year, month - 1, day);
+                }
+                
+                return null;
+            };
+
+            const formatDate = (date) => {
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            };
+
+            const formatEmployeeId = (id) => {
+                return String(id).padStart(4, '0');
+            };
+
+            const calculateAcquisitivePeriod = (admissionDate, goLive) => {
+                const admission = new Date(admissionDate);
+                const today = new Date(goLive);
+                
+                let periodStart = new Date(admission);
+                
+                // Encontrar o período aquisitivo vigente
+                while (true) {
+                    const periodEnd = new Date(periodStart);
+                    periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+                    periodEnd.setDate(periodEnd.getDate() - 1);
+                    
+                    if (today >= periodStart && today <= periodEnd) {
+                        return {
+                            start: periodStart,
+                            end: periodEnd
+                        };
+                    }
+                    
+                    periodStart = new Date(periodEnd);
+                    periodStart.setDate(periodStart.getDate() + 1);
+                }
+            };
+
+            const processFile = (fileContent) => {
+                setProcessing(true);
+                
+                Papa.parse(fileContent, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        const goLive = new Date(goLiveDate);
+                        const processed = [];
+                        const excluded = {
+                            interns: 0,
+                            invalidDates: 0,
+                            duplicates: 0
+                        };
+                        const seenIds = new Set();
+
+                        results.data.forEach(row => {
+                            const empId = row.EXTERNAL_HR_ID?.trim();
+                            const admissionDateStr = row.LATEST_ASSIGNMENT_BEGIN_DATE?.trim();
+                            const policyProfile = row.POLICY_PROFILE?.trim();
+
+                            // Excluir estagiários (PP7)
+                            if (policyProfile === 'PP7') {
+                                excluded.interns++;
+                                return;
+                            }
+
+                            // Validar data
+                            const admissionDate = parseDate(admissionDateStr);
+                            if (!admissionDate) {
+                                excluded.invalidDates++;
+                                return;
+                            }
+
+                            // Excluir duplicados
+                            if (seenIds.has(empId)) {
+                                excluded.duplicates++;
+                                return;
+                            }
+                            seenIds.add(empId);
+
+                            // Calcular período aquisitivo
+                            const period = calculateAcquisitivePeriod(admissionDate, goLive);
+
+                            processed.push({
+                                EMPLOYEE_ID: formatEmployeeId(empId),
+                                ACCRUAL_CODE: 'EXT_BRA_VACATION_ACCRUAL',
+                                ENTITLEMENT_CODE: 'EXT_BRA_VACATION_ENTITLEMENT',
+                                ACCRUAL_BANK: 'EXT_BRA_VACATION_ACCRUAL_BANK',
+                                ENTITLEMENT_BANK: 'EXT_BRA_VACATION_ENTITLEMENT_BANK',
+                                CARRYOVER_BANK: 'EXT_BRA_VACATION_CARRYOVER_BANK',
+                                ACCRUAL_EMPLOYMENT_TERM_ACCRUAL_PERIOD_TYPE: 'VACATION_YEAR',
+                                ENTITLEMENT_EMPLOYMENT_TERM_ACCRUAL_PERIOD_TYPE: 'VACATION_YEAR',
+                                EMPLOYMENT_TERM_BEGIN_DATE: formatDate(period.start),
+                                EMPLOYMENT_TERM_END_DATE: formatDate(period.end),
+                                AS_OF_DATE: formatDate(goLive),
+                                BENEFIT_YEAR_COUNT: '1'
+                            });
+                        });
+
+                        setData(processed);
+                        setPreview(processed.slice(0, 10));
+                        setStats({
+                            total: processed.length,
+                            excluded
+                        });
+                        setProcessing(false);
+                    },
+                    error: (error) => {
+                        alert('Erro ao processar arquivo: ' + error.message);
+                        setProcessing(false);
+                    }
+                });
+            };
+
+            const handleFileUpload = (e) => {
+                const uploadedFile = e.target.files[0];
+                if (uploadedFile) {
+                    setFile(uploadedFile);
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        processFile(event.target.result);
+                    };
+                    reader.readAsText(uploadedFile);
+                }
+            };
+
+            const downloadCSV = () => {
+                if (data.length === 0) {
+                    alert('Nenhum dado para exportar!');
+                    return;
+                }
+
+                const headers = [
+                    'EMPLOYEE_ID', 'ACCRUAL_CODE', 'ENTITLEMENT_CODE', 'ACCRUAL_BANK',
+                    'ENTITLEMENT_BANK', 'CARRYOVER_BANK', 'ACCRUAL_EMPLOYMENT_TERM_ACCRUAL_PERIOD_TYPE',
+                    'ENTITLEMENT_EMPLOYMENT_TERM_ACCRUAL_PERIOD_TYPE', 'EMPLOYMENT_TERM_BEGIN_DATE',
+                    'EMPLOYMENT_TERM_END_DATE', 'AS_OF_DATE', 'BENEFIT_YEAR_COUNT'
+                ];
+
+                const csv = Papa.unparse({
+                    fields: headers,
+                    data: data.map(row => headers.map(h => row[h]))
+                });
+
+                // Adicionar 2 linhas de header padrão WFS
+                const finalCSV = `\n\n${csv}`;
+                
+                const blob = new Blob([finalCSV], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                const timestamp = new Date().toISOString().split('T')[0];
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', `EXT_BRA_VACATION_INITIALIZATION_DATES_${timestamp}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+                    <div className="max-w-6xl mx-auto">
+                        {/* Header */}
+                        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+                            <h1 className="text-4xl font-bold text-indigo-900 mb-2">
+                                🏖️ LD57 - Vacation Initialization Generator
+                            </h1>
+                            <p className="text-gray-600">
+                                Gerador de arquivo de inicialização de períodos aquisitivos de férias (CLT)
+                            </p>
+                        </div>
+
+                        {/* Configuração */}
+                        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4">⚙️ Configuração</h2>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        📅 Data de Go-Live
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={goLiveDate}
+                                        onChange={(e) => setGoLiveDate(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        📁 Upload emp_import.csv
+                                    </label>
+                                    <input
+                                        type="file"
+                                        accept=".csv"
+                                        onChange={handleFileUpload}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Estatísticas */}
+                        {stats && (
+                            <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Estatísticas</h2>
+                                
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="bg-green-100 p-4 rounded-lg">
+                                        <div className="text-3xl font-bold text-green-800">{stats.total}</div>
+                                        <div className="text-sm text-green-600">Registros Gerados</div>
+                                    </div>
+                                    
+                                    <div className="bg-yellow-100 p-4 rounded-lg">
+                                        <div className="text-3xl font-bold text-yellow-800">{stats.excluded.interns}</div>
+                                        <div className="text-sm text-yellow-600">Estagiários (PP7)</div>
+                                    </div>
+                                    
+                                    <div className="bg-red-100 p-4 rounded-lg">
+                                        <div className="text-3xl font-bold text-red-800">{stats.excluded.invalidDates}</div>
+                                        <div className="text-sm text-red-600">Datas Inválidas</div>
+                                    </div>
+                                    
+                                    <div className="bg-purple-100 p-4 rounded-lg">
+                                        <div className="text-3xl font-bold text-purple-800">{stats.excluded.duplicates}</div>
+                                        <div className="text-sm text-purple-600">Duplicados</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Preview */}
+                        {preview.length > 0 && (
+                            <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">👀 Preview (10 primeiros registros)</h2>
+                                
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee ID</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Início Período</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fim Período</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">As Of Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {preview.map((row, idx) => (
+                                                <tr key={idx} className="hover:bg-gray-50">
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.EMPLOYEE_ID}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.EMPLOYMENT_TERM_BEGIN_DATE}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.EMPLOYMENT_TERM_END_DATE}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{row.AS_OF_DATE}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Download */}
+                        {data.length > 0 && (
+                            <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+                                <button
+                                    onClick={downloadCSV}
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition duration-200 transform hover:scale-105"
+                                >
+                                    ⬇️ Baixar CSV ({data.length} registros)
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="mt-8 text-center text-gray-600 text-sm">
+                            <p>🎓 Desenvolvido por Consultor Sênior WFS | 20 anos de experiência em Time & Attendance</p>
+                            <p className="mt-2">✅ Conformidade CLT | ✅ Boas práticas WFS | ✅ Automação de Go-Live</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
