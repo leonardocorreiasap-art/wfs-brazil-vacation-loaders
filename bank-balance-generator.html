@@ -48,6 +48,12 @@
                 return year + '-' + month + '-' + day;
             };
 
+            const parseGoLiveDate = (dateStr) => {
+                // Parse manual para evitar problemas de timezone
+                const [year, month, day] = dateStr.split('-').map(Number);
+                return new Date(year, month - 1, day);
+            };
+
             const formatEmployeeId = (id) => {
                 return String(id).padStart(4, '0');
             };
@@ -115,7 +121,7 @@
                         header: true,
                         skipEmptyLines: true,
                         complete: (results) => {
-                            const goLive = new Date(goLiveDate);
+                            const goLive = parseGoLiveDate(goLiveDate);
                             const processed = [];
                             const excluded = {
                                 interns: 0,
