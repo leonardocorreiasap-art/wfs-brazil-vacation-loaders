@@ -29,12 +29,10 @@
             const parseDate = (dateStr) => {
                 if (!dateStr) return null;
                 
-                // Formato YYYY-MM-DD
                 if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
                     return new Date(dateStr);
                 }
                 
-                // Formato DD/MM/YYYY
                 if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
                     const [day, month, year] = dateStr.split('/');
                     return new Date(year, month - 1, day);
@@ -58,10 +56,6 @@
                 const admission = new Date(admissionDate);
                 const today = new Date(goLive);
                 
-                let months = (today.getFullYear() - admission.getFullYear()) * 12;
-                months += today.getMonth() - admission.getMonth();
-                
-                // Encontrar o início do período aquisitivo vigente
                 let periodStart = new Date(admission);
                 while (true) {
                     const periodEnd = new Date(periodStart);
@@ -69,7 +63,6 @@
                     periodEnd.setDate(periodEnd.getDate() - 1);
                     
                     if (today >= periodStart && today <= periodEnd) {
-                        // Calcular meses dentro deste período
                         const monthsInPeriod = (today.getFullYear() - periodStart.getFullYear()) * 12;
                         return monthsInPeriod + (today.getMonth() - periodStart.getMonth());
                     }
@@ -81,18 +74,14 @@
 
             const calculateBalances = (admissionDate, goLive) => {
                 const monthsWorked = calculateMonthsWorked(admissionDate, goLive);
-                
-                // 2,5 dias por mês trabalhado no período aquisitivo atual
                 const accrualBalance = (monthsWorked * 2.5).toFixed(2);
-                
-                // Entitlement: 30 dias após completar 12 meses (0 antes disso)
                 const entitlementBalance = monthsWorked >= 12 ? "30.00" : "0.00";
                 
                 return {
                     accrual: accrualBalance,
                     entitlement: entitlementBalance,
-                    carryover: "0.00", // Sempre 0 a menos que seja especificado
-                    thirteenth: "1.0" // 1 adiantamento disponível por ano
+                    carryover: "0.00",
+                    thirteenth: "1.0"
                 };
             };
 
@@ -117,32 +106,27 @@
                             const admissionDateStr = row.LATEST_ASSIGNMENT_BEGIN_DATE?.trim();
                             const policyProfile = row.POLICY_PROFILE?.trim();
 
-                            // Excluir estagiários (PP7)
                             if (policyProfile === 'PP7') {
                                 excluded.interns++;
                                 return;
                             }
 
-                            // Validar data
                             const admissionDate = parseDate(admissionDateStr);
                             if (!admissionDate) {
                                 excluded.invalidDates++;
                                 return;
                             }
 
-                            // Excluir duplicados
                             if (seenIds.has(empId)) {
                                 excluded.duplicates++;
                                 return;
                             }
                             seenIds.add(empId);
 
-                            // Calcular saldos
                             const balances = calculateBalances(admissionDate, goLive);
                             const formattedEmpId = formatEmployeeId(empId);
                             const asOfDate = formatDateISO(goLive);
 
-                            // Sempre incluir Accrual e Entitlement
                             processed.push({
                                 EMPLOYEE_ID: formattedEmpId,
                                 BANK: 'EXT_BRA_VACATION_ACCRUAL_BANK',
@@ -157,7 +141,6 @@
                                 AS_OF_DATE: asOfDate
                             });
 
-                            // Incluir Carryover se selecionado
                             if (includeCarryover) {
                                 processed.push({
                                     EMPLOYEE_ID: formattedEmpId,
@@ -167,7 +150,6 @@
                                 });
                             }
 
-                            // Incluir 13º Salário se selecionado
                             if (includeThirteenth) {
                                 processed.push({
                                     EMPLOYEE_ID: formattedEmpId,
@@ -213,7 +195,6 @@
                 }
 
                 const headers = ['EMPLOYEE_ID', 'BANK', 'BALANCE', 'AS_OF_DATE'];
-
                 const csv = Papa.unparse({
                     fields: headers,
                     data: data.map(row => headers.map(h => row[h]))
@@ -235,7 +216,6 @@
             return (
                 <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 p-8">
                     <div className="max-w-6xl mx-auto">
-                        {/* Header */}
                         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
                             <h1 className="text-4xl font-bold text-teal-900 mb-2">
                                 💰 Bank Balance Import Generator
@@ -245,7 +225,6 @@
                             </p>
                         </div>
 
-                        {/* Configuração */}
                         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
                             <h2 className="text-2xl font-bold text-gray-800 mb-4">⚙️ Configuração</h2>
                             
@@ -275,7 +254,6 @@
                                 </div>
                             </div>
 
-                            {/* Opções de Bancos */}
                             <div className="border-t pt-6">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-4">🏦 Bancos Opcionais</h3>
                                 
@@ -289,6 +267,29 @@
                                                 className="mt-1 mr-3 h-5 w-5 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
                                             />
                                             <div>
+                                                <div className="font-semibold text-gray-800">
+                                                    EXT_BRA_VACATION_CARRYOVER_BANK
+                                                </div>
+                                                <div className="text-sm text-gray-600 mt-1">
+                                                    ⚠️ Marque SOMENTE se houver férias vencidas a migrar de sistemas anteriores. 
+                                                    Na maioria dos Go-Lives, começar com saldo zero.
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
+                                        <label className="flex items-start cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={includeThirteenth}
+                                                onChange={(e) => setIncludeThirteenth(e.target.checked)}
+                                                className="mt-1 mr-3 h-5 w-5 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                                            />
+                                            <div>
+                                                <div className="font-semibold text-gray-800">
+                                                    EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK
+                                                </div>
                                                 <div className="text-sm text-gray-600 mt-1">
                                                     ℹ️ Marque se o WFS gerenciará adiantamentos do 13º salário. 
                                                     Saldo inicial: 1.0 (um adiantamento disponível por ano).
@@ -300,7 +301,6 @@
                             </div>
                         </div>
 
-                        {/* Estatísticas */}
                         {stats && (
                             <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
                                 <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Estatísticas</h2>
@@ -327,7 +327,6 @@
                                     </div>
                                 </div>
 
-                                {/* Detalhamento dos bancos */}
                                 <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <div className="bg-teal-50 p-3 rounded border border-teal-200">
                                         <div className="text-xs text-teal-600 font-semibold">ACCRUAL</div>
@@ -356,7 +355,6 @@
                             </div>
                         )}
 
-                        {/* Preview */}
                         {preview.length > 0 && (
                             <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
                                 <h2 className="text-2xl font-bold text-gray-800 mb-4">👀 Preview (12 primeiros registros)</h2>
@@ -377,7 +375,7 @@
                                                     <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.EMPLOYEE_ID}</td>
                                                     <td className="px-4 py-3 text-sm text-gray-600">
                                                         <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                                                            row.BANK.includes('ACCRUAL') ? 'bg-teal-100 text-teal-800' :
+                                                            row.BANK.includes('ACCRUAL') && !row.BANK.includes('CARRYOVER') ? 'bg-teal-100 text-teal-800' :
                                                             row.BANK.includes('ENTITLEMENT') ? 'bg-green-100 text-green-800' :
                                                             row.BANK.includes('CARRYOVER') ? 'bg-yellow-100 text-yellow-800' :
                                                             'bg-blue-100 text-blue-800'
@@ -395,7 +393,6 @@
                             </div>
                         )}
 
-                        {/* Download */}
                         {data.length > 0 && (
                             <div className="bg-white rounded-lg shadow-lg p-8">
                                 <div className="text-center mb-6">
@@ -418,7 +415,6 @@
                                     </button>
                                 </div>
 
-                                {/* Instruções */}
                                 <div className="mt-8 bg-blue-50 border-l-4 border-blue-400 p-6 rounded">
                                     <h3 className="font-semibold text-blue-900 mb-3">📋 Próximos Passos:</h3>
                                     <ol className="space-y-2 text-sm text-blue-800">
@@ -431,7 +427,6 @@
                             </div>
                         )}
 
-                        {/* Informações sobre Cálculo */}
                         <div className="mt-8 bg-white rounded-lg shadow-lg p-8">
                             <h2 className="text-2xl font-bold text-gray-800 mb-4">🧮 Lógica de Cálculo CLT</h2>
                             
@@ -481,7 +476,6 @@
                             </div>
                         </div>
 
-                        {/* Footer */}
                         <div className="mt-8 text-center text-gray-600 text-sm">
                             <p>🎓 Desenvolvido por Consultor Sênior WFS | 20 anos de experiência em Time & Attendance</p>
                             <p className="mt-2">✅ Conformidade CLT | ✅ Boas práticas WFS | ✅ Automação de Go-Live</p>
@@ -494,27 +488,4 @@
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
-</html>="font-semibold text-gray-800">
-                                                    EXT_BRA_VACATION_CARRYOVER_BANK
-                                                </div>
-                                                <div className="text-sm text-gray-600 mt-1">
-                                                    ⚠️ Marque SOMENTE se houver férias vencidas a migrar de sistemas anteriores. 
-                                                    Na maioria dos Go-Lives, começar com saldo zero.
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-
-                                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-                                        <label className="flex items-start cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={includeThirteenth}
-                                                onChange={(e) => setIncludeThirteenth(e.target.checked)}
-                                                className="mt-1 mr-3 h-5 w-5 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-                                            />
-                                            <div>
-                                                <div className="font-semibold text-gray-800">
-                                                    EXT_BRA_VACATION_THIRTEENTH_MONTH_ADVANCE_BANK
-                                                </div>
-                                                <div className
+</html>
